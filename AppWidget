@@ -1,0 +1,90 @@
+### 使用步骤 ###
+
+步骤1.创建一个java文件  如下:
+
+public class MyWidgetProvider extends AppWidgetProvider {
+
+@Override
+public void onReceive(Context context, Intent intent) {
+    // TODO Auto-generated method stub
+    super.onReceive(context, intent);
+}
+
+// 更新
+@Override
+public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    // TODO Auto-generated method stub
+    super.onUpdate(context, appWidgetManager, appWidgetIds);
+}
+
+// 第一个被添加
+@Override
+public void onEnabled(Context context) {
+    super.onEnabled(context);
+}
+
+// 最后一个被移除
+@Override
+public void onDisabled(Context context) {
+    // TODO Auto-generated method stub
+    super.onDisabled(context);
+}
+
+// 被删除
+@Override
+public void onDeleted(Context context, int[] appWidgetIds) {
+    // TODO Auto-generated method stub
+    super.onDeleted(context, appWidgetIds);
+}
+
+}
+
+步骤2. 在layout文件夹中 创建一个布局文件
+
+步骤3. 在res文件夹中 新建xml文件夹  生成如下xml文件
+    <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:minWidth="288px"
+     android:minHeight="144px"
+    android:initialLayout="@layout/mywidget"
+    android:updatePeriodMillis="0"
+
+
+步骤4.在清单文件中注册:
+<receiver android:name="com.example.appwidgettest14.MyWidgetProvider" >
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/myappwidget" />
+    </receiver>
+    
+    //获取一个远程布局
+    remote = new RemoteViews(getApplicationContext().getPackageName(), R.layout.mywidget);
+
+    Intent intent = new Intent(getApplicationContext(), DialogActivity.class);
+    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+    //设置布局中 指定ID控件的响应事件 
+    remote.setOnClickPendingIntent(R.id.widget_tv1, pendingIntent );
+
+
+    provider = new ComponentName(getApplicationContext(), MyWidgetProvider.class);
+    //获取Appwidget管理类  并使用它对桌面小控件完成更新
+    manager =  AppWidgetManager.getInstance(getApplicationContext());
+    timer.schedule(new TimerTask() {
+
+        @Override
+        public void run() {
+            updateViews();
+        }
+    }, 0, 1000);
+
+}
+
+
+private void updateViews() {
+    remote.setTextViewText(R.id.widget_tv1, dateFormat.format(new Date()));
+    remote.setTextViewText(R.id.widget_tv2, dateFormat2.format(new Date()));
+    manager.updateAppWidget(provider, remote);
+}
