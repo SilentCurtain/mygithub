@@ -1,0 +1,90 @@
+1. View的子类
+
+View在Android是最基础的几个控件之一， 所有的控件均继承自View，你也可以直接继承View也可以继承其他的控件比如ImageView等。
+
+
+当然，你至少需要提供一个构造函数，其中Context和AttributeSet作为参数。 举例如下：
+class PieChart extends View {  
+    public PieChart(Context context, AttributeSet attrs) {  
+        super(context, attrs);  
+    }  
+}  
+
+2. 自定义属性
+一个完美的自定义控件也可以添加xml来配置属性和风格。 要实现这一点，可按照下列步骤来做：
+1） 添加自定义属性<declare-styleable>到xml文件中
+2） 在xml的<declare-styleable>中，指定属性的值
+3） 在view中获取xml中的值
+4） 将获取的值应用到view中
+
+添加<declare-styleable> 到你的程序中，习惯上一般是放在res/values/attrs.xml文件中，例如：
+
+<resources>  
+   <declare-styleable name="PieChart">  
+       <attr name="showText" format="boolean" />  
+       <attr name="labelPosition" format="enum">  
+           <enum name="left" value="0"/>  
+           <enum name="right" value="1"/>  
+       </attr>  
+   </declare-styleable>  
+</resources>  
+
+这段代码声明了两个自定义的属性 showText和labelPosition，他们属于一个自定义的实体PieChat。
+
+
+一旦定义好了属性，就可以在xml中使用这些属性了，下面是一个简单的例子：
+
+<?xml version="1.0" encoding="utf-8"?>  
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  
+   xmlns:custom="http://schemas.android.com/apk/res/com.example.customviews">  
+ <com.example.customviews.charting.PieChart  
+     custom:showText="true"  
+     custom:labelPosition="left" />  
+</LinearLayout> 
+
+可以看到和标准的Android的组件一样，唯一的差别在他们属于不同的命名空间，标准的组件的命名空间一般是http://schemas.android.com/apk/res/android，
+而我们自定义的命名空间是http://schemas.android.com/apk/res/[your package name]。注意到xmlns:custom中的custom了吗？你可以使用任意的字符，但是
+要和下面的控件的定义中的字符要保持一致。
+另外一个需要注意的是， xml中的tag：com.example.customviews.charting.PieChart，需要的完整的包名，如果你的自定义控件是个内部类(好吧，这么奇葩)，
+也必须给全路径，假设PieChat有个内部类PieView，如果在XML中引用它，需要这样使用：com.example.customviews.charting.PieChart$PieView
+
+
+3） 应用自定义的属性值
+当View被创建的时候，可以通过AttributeSet读取所有的定义在xml中的属性，在构造函数中通过obtainStyledAttributes读取attrs，
+该方法会返回一个TypeArray数组。通过TypeArray可以读取到已经定义在XML中的方法。下面的例子展示了读取上文中的xml属性值。
+
+public PieChart(Context context, AttributeSet attrs) {  
+   super(context, attrs);  
+   TypedArray a = context.getTheme().obtainStyledAttributes(  
+        attrs,  
+        R.styleable.PieChart,  
+        0, 0);  
+  
+   try {  
+       mShowText = a.getBoolean(R.styleable.PieChart_showText, false);  
+       mTextPos = a.getInteger(R.styleable.PieChart_labelPosition, 0);  
+   } finally {  
+       a.recycle();  
+   }  
+}  
+需要强调的是， TypeArray使用完毕后需要销毁，不然会发生内存泄露。
+
+4） 添加自定义的方法和事件
+自定义属性很强大，但缺点也很明显，它只能在view初始化的时候被应用到控件中。 为了添加更加灵活的行为， 可以为每一个属性添加getter和setter
+对。下面的代码段展示了PieChat的属性showText
+
+public boolean isShowText() {  
+   return mShowText;  
+}  
+  
+public void setShowText(boolean showText) {  
+   mShowText = showText;  
+   invalidate();  
+   requestLayout();  
+}  
+在setShowText中调用了invalidate()和requestLayout(), 保证了view能及时的更新。在你的自定义View中，如果有属性被改变并且需要立即生效时，
+你也必须调用这个方法。 这样系统会立即重新绘制view。 同样的，如果view的尺寸或者形状发生了变化，你也必须调用requestLayout(). 不然会引起
+很多问题。
+
+一般你也需要添加事件回调来和调用者沟通。 例如PieChat暴露了OnCurrentItemChanged来通知调用者pie chat发生了旋转。
+在开发过程中，很容易忘记添加一些属性和事件，特别是作者是这个自定义View的唯一使用者的时候。为使View有更普遍的适用性，应当花些时间考虑的更加周全。
