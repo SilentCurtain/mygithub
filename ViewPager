@@ -1,0 +1,63 @@
+使用方式
+步骤1.    在布局文件中 加入
+<android.support.v4.view.ViewPager
+
+    />
+步骤2.    在Activity中 获取控件
+步骤3.    准备数据源 (使用填充起  填充出对应页数的布局视图)
+步骤4.    自定义Adapter 继承自 PagerAdapter
+
+PagerAdapter
+使用PagerAdapter 最少要实现这四个方法
+//  总页数  一般使用数据源length
+    @Override
+    public int getCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+    //比较好玩.
+    //参数1 是由参数2这个key生成的吗?
+   return arg0==arg1
+    @Override
+    public boolean isViewFromObject(View arg0, Object arg1) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    //移除一个视图container.removeView(xxx.get(position))
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        // TODO Auto-generated method stub
+        super.destroyItem(container, position, object);
+    }
+    //添加一个视图container.addView(xxx.get(position))
+    return xxx.get(position)
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        // TODO Auto-generated method stub
+        return super.instantiateItem(container, position);
+    }
+    
+    Viewpager 监听
+    
+    使用方式:
+pager.addOnPageChangeListener(new OnPageChangeListener() {
+
+        //当页面被切换, arg0: 页面下标 从0开始
+        @Override
+        public void onPageSelected(int arg0) {
+//              Log.e("Log", "onPageSelected:"+arg0);
+        }
+
+        //当Viewpager被滑动  触发这个方法: 参数1: (如果是向右)当前view下标  (如果向左) 上一个view下标
+        //参数2: 滑动的百分比  向右从0.01--0.99   向左 0.99-0.01
+        //参数3: 滑动的像素, 比如 宽320   ,(1-319)
+        @Override
+        public void onPageScrolled(int arg0, float arg1, int arg2) {
+//              Log.e("Log", "onPageScrolled  arg2:"+arg2);
+        }
+        //当前Pager滑动的状态监听
+        @Override
+        public void onPageScrollStateChanged(int arg0) {
+            Log.e("Log", "onPageScrollStateChanged  arg0:"+arg0);
+        }
+    });
