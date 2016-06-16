@@ -1,0 +1,75 @@
+android 提供的 集成了子线程 与 UI线程交互的功能
+
+            /**
+             * 参数一: 当你的子线程启动时 需要什么资源? 
+                参数二: 当你的子线程运行时 需要往UI线程 传递什么类型的参数
+                参数三: 当你的子线程运行完毕, 需要给UI线程返回一个什么类型的结果
+             */
+            AsyncTask<Void, String, Void> task = new AsyncTask<Void, String, Void>(){
+
+                /**
+                 * UI线程方法 
+                 * task 子线程启动之前 做的准备操作
+                 */
+                @Override
+                protected void onPreExecute() {
+                    // TODO Auto-generated method stub
+                    super.onPreExecute();
+                    but.setTextColor(Color.parseColor("#626262"));
+                    but.setClickable(false);
+                }
+
+
+                /**
+                 * doInBackground(Void... params)
+                 * 子线程方法  用来执行耗时操作
+                 * params 当你的task启动时 传递的参数
+                 * return 当子线程死亡 也就是这个方法执行完毕 要返回给UI线程的参数
+                 */
+                @Override
+                protected Void doInBackground(Void... params) {
+
+                    for (int i = 60; i < 0; i--) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        //通知UI线程
+                        publishProgress(i+"s");
+                    }
+                    //当子线程执行完毕 返回到UI线程
+                    return null;
+                }
+                /**
+                 * Ui线程中的方法, 可以直接更改UI线程
+                 * 但是它如果想要被调用 必须在子线程中调用publishProgress()方法;
+                 * 一般用于展示子线程任务执行的百分比 , 比如下载数据
+                 */
+                @Override
+                protected void onProgressUpdate(String... values) {
+                    // TODO Auto-generated method stub
+                    super.onProgressUpdate(values);
+                    but.setText(values[0]);
+                }
+
+
+                /**
+                 * UI线程中的方法, 可以直接更改UI线程
+                 * 当你的子线程死亡  也就是当doInBackground方法 return
+                 * result: doInBackground方法return的参数
+                 */
+                @Override
+                protected void onPostExecute(Void result) {
+                    // TODO Auto-generated method stub
+                    super.onPostExecute(result);
+                    but.setClickable(true);
+                    but.setTextColor(Color.parseColor("#000000"));
+                    but.setText("获取验证");
+                }
+
+            };
+
+            task.execute();
+            
+                task.cancel(true);
