@@ -1,0 +1,46 @@
+是一个控件 ;
+步骤: 1. 在布局文件中 加入节点
+步骤: 2. 在Activity中获取控件对象
+步骤: 3. 使用
+
+常用方法:
+
+closeDrawer(Gravity.XXXXX);要关闭的菜单的方向
+closeDrawer(VIEW V);要关闭的菜单的View对象
+openDrawer(Gravity.XXXXX); 要打开的菜单 (方向)
+openDrawer(VIEW V); 要打开的菜单 (view对象)
+
+监听DrawerLayout状态
+mDrawerLayout.setDrawerListener(new DrawerListener() {
+
+//          arg0 : 当前滑动状态   闲置 , 滑动 , 停止
+        @Override
+        public void onDrawerStateChanged(int arg0) {
+//              Log.i("Log", arg0+"");
+        }
+
+        //arg0:正在展开的菜单view对象
+        //arg1: 展开的百分比 0.01 -- 1.0
+        @Override
+        public void onDrawerSlide(View arg0, float arg1) {
+            if(arg0==lv){
+                Log.i("Log", "是lv");
+            }
+            Log.i("Log", "arg1:"+arg1);
+
+        }
+        // 当一个抽屉被打开时 , 此方法被调用, arg0:是被打开的抽屉View对象
+        @Override
+        public void onDrawerOpened(View arg0) {
+
+        }
+        // 当一个抽屉被关闭时 , 此方法被调用, arg0:是被关闭的抽屉View对象
+        @Override
+        public void onDrawerClosed(View arg0) {
+
+        }
+    });
+
+判断抽屉是否打开
+mDrawerLayout.isDrawerOpen(Gravity.START)
+mDrawerLayout.isDrawerOpen(View v)
