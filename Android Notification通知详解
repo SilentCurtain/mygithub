@@ -1,0 +1,38 @@
+常量：
+DEFAULT_ALL    使用所有默认值，比如声音，震动，闪屏等等
+DEFAULT_LIGHTS 使用默认闪光提示
+DEFAULT_SOUNDS 使用默认提示声音
+DEFAULT_VIBRATE 使用默认手机震动 
+【说明】：加入手机震动，一定要在manifest.xml中加入权限：
+<uses-permission android:name="android.permission.VIBRATE" />
+以上的效果常量可以叠加,即通过
+notification.defaults =DEFAULT_SOUND|DEFAULT_VIBRATE;  
+notification.defaults |= DEFAULT_SOUND (最好在真机上测试，震动效果模拟器上没有)
+
+
+
+//设置flag位
+FLAG_AUTO_CANCEL  该通知能被状态栏的清除按钮给清除掉
+FLAG_NO_CLEAR     该通知不能被状态栏的清除按钮给清除掉
+FLAG_ONGOING_EVENT 通知放置在正在运行
+FLAG_INSISTENT 是否一直进行，比如音乐一直播放，知道用户响应
+
+
+
+常用字段：
+contentIntent  设置PendingIntent对象，点击时发送该Intent
+defaults 添加默认效果
+flags 设置flag位，例如FLAG_NO_CLEAR等
+icon 设置图标
+sound 设置声音
+tickerText 显示在状态栏中的文字
+when 发送此通知的时间戳
+builder.setFullScreenIntent(hangPendingIntent, true);//悬挂式通知
+
+
+NotificationManager常用方法介绍：
+public void cancelAll() 移除所有通知(只是针对当前Context下的Notification)
+public  void cancel(int id) 移除标记为id的通知 (只是针对当前Context下的所有Notification)
+public  void notify(String tag ,int id, Notification notification) 将通知加入状态栏，标签为tag，标记为id
+public  void notify(int id, Notification notification) 将通知加入状态栏，标记为id
+
