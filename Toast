@@ -1,0 +1,26 @@
+ 扩展Toast
+    Toast t = Toast.makeText(this, "被点击", Toast.LENGTH_SHORT);
+            //获取Toast中加载的LinearLayout
+////        LinearLayout toastView = (LinearLayout) t.getView();
+            //创建一个ImageView  并设置到Toast中的LinearLayout中
+////        ImageView img = new ImageView(this);
+////        img.setImageResource(R.drawable.ic_launcher);
+////        toastView.addView(img); 
+////        t.show();
+        //自定义Toast
+//      Toast t = new Toast(this);
+        //使用填充器 填充一个布局 
+//      View view = getLayoutInflater().inflate(R.layout.toast, null);
+        //获取布局中的各种控件 并设置响应的值
+//      TextView title = (TextView) view.findViewById(R.id.toast_title);
+//      TextView tv = (TextView) view.findViewById(R.id.toast_tv);
+//      ImageView img = (ImageView) view.findViewById(R.id.toast_img);
+//      title.setText("被改变了");
+//      tv.setText("被改变了");
+//      img.setImageResource(R.drawable.ic_launcher);
+//      t.setView(view);
+//      t.setDuration(Toast.LENGTH_SHORT);
+//      t.show();
+
+//  这是Toast弹出的位置
+t.setGravity(Gravity.TOP, -40, 0);
