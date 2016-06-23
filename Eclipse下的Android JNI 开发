@@ -1,0 +1,157 @@
+1 创建Android工程
+
+首先建立一个名为AndroidJniTest的Android工程，包名默认为com.example.androidjnitest，src目录下自动创建MainActivity.java。
+2 设计JNI接口
+
+创建新的文件包com.example.jni，并在改包下新建一个TestJNI.java的类。
+打开TestJNI.java，我们将在这个文件里创建一个JNI接口类，该Java类提供一个加法运算的接口：
+注意，这里的函数声明要加上native关键字。
+3 编译JNI
+
+将TestJNI.java文件复制到工程的bin目录下，在终端中进入该工程的bin目录，输入javac TestJNI.java，这时会生成一个TestJNI.class文件。
+在bin文件夹下，如果没有则创建目录：/com/example/jni，并把TestJNI.class复制到/bin/com/example/jni目录下。然后在终端里进入工程的bin目录，输入javah -jni com.example.jni.TestJNI，此时会生成一个com_example_jni_TestJNI.h文件。<喎�"http://www.2cto.com/kf/ware/vc/" target="_blank" class="keylink">vcD4KPHA+IDxpbWcgc3JjPQ=="http://www.2cto.com/uploadfile/Collfiles/20150212/2015021208583683.png" alt="\">
+
+com_example_jni_TestJNI.h文件就是对应于上面定义的Java接口的C/C++头文件。打开这个文件，可以看到系统已经为我们自动完成了接口函数的声明：
+
+4 用C/C++实现JNI
+
+有了JNI的C/C++头文件，就可以在C层实现JNI接口了。首先在工程目录下创建一个jni目录，这个目录就是专门用来放C/C++代码的。把com_example_jni_TestJNI.h文件复制到jni目录下，并在这里创建一个com_example_jni_TestJNI.cpp文件。
+
+由于我想用C++来实现JNI，所以上面两个文件我只是用来作为动态链接库的接口，具体的实现我希望放在一个类里面来完成，因此我再添加两个文件：Add.h和Add.cpp。
+下面我们就来实现CAdd类和JNI接口。首先实现CAdd类：
+
+CAdd.h
+
+
+#ifndef JNI_TEST_ADD
+#define JNI_TEST_ADD
+class CAdd{
+public:
+CAdd();
+~CAdd();
+int add(int x, int y);
+};
+#endif
+
+CAdd.cpp
+
+#include "Add.h"
+CAdd::CAdd(){ 
+}
+CAdd::~CAdd(){ 
+}
+int CAdd::add(int x, int y){
+return x+y;
+
+然后我们来写com_example_jni_TestJNI.cpp，实现JNI：
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "Add.h"
+  
+CAdd *pCAdd = NULL;
+  
+JNIEXPORT jboolean JNICALL Java_com_example_jni_TestJNI_init
+  (JNIEnv *env, jobject obj){
+if(pCAdd==NULL){
+pCAdd = new CAdd ;
+}
+return pCAdd!=NULL;
+}
+  
+JNIEXPORT jint JNICALL Java_com_example_jni_TestJNI_add
+  (JNIEnv *env, jobject obj, jint x, jint y){
+jint res = -1;
+if(pCAdd!=NULL){
+res = pCAdd->add(x,y);
+}
+return res;
+}
+  
+JNIEXPORT void JNICALL Java_com_example_jni_TestJNI_destory
+  (JNIEnv * env, jobject obj){
+if(pCAdd!=NULL){
+delete pCAdd;
+pCAdd=NULL;
+}
+}</stdio.h></stdlib.h>
+}
+
+到此我们的C/C++部分就全部实现了。
+5 创建mk文件
+
+JNI实现了之后就要把C/C++代码编译成动态链接库.so文件，这样Java程序才能调用JNI的接口。要编译so文件，需要写Android.mk和Application.mk两个文件。我们先来写Android.mk。
+
+先在工程目录的jni下创建一个Android.mk文件：
+然后打开文件在里面输入如下内容：
+
+LOCAL_PATH := $(call my-dir)
+  
+include $(CLEAR_VARS) 
+  
+LOCAL_MODULE    := TestJNI
+LOCAL_SRC_FILES := com_example_jni_TestJNI.cpp
+LOCAL_SRC_FILES += Add.cpp
+  
+include $(BUILD_SHARED_LIBRARY)
+其中LOCAL_PATH是C/C++代码所在目录，也就是我们的jni目录。
+LOCAL_MODULE是要编译的库的名称。编译器会自动在前面加上lib，在后面加上.so。
+
+LOCAL_SRC_FILES是要编译的C/C++文件。
+
+现在我们在工程的根目录下创建一个Application.mk文件，并输入如下内容：
+
+
+APP_PROJECT_PATH := ${call my-dir}
+APP_MODULES := TestJNI
+6 编译动态链接库
+
+写完了mk文件就可以开始编译C/C++代码了。
+
+默认在Windows7下配置好了NDK开发环境，打开cygwin，进入到工程目录。
+
+\
+
+在终端里进入工程的根目录，输入命令“$NDK/ndk-build”命令即可编译
+
+\
+
+编译成功后会在工程目录的libs/armeabi目录下生成一个libTestJNI.so文件。
+
+\
+
+7 在Java中调用JNI
+
+现在我们的Android应用可以调用JNI计算加法的代码，如下：
+
+static {
+System.load("TestJNI");
+}
+TextView tvX = null;
+TextView tvY = null;
+TextView tvSum = null; 
+Button   btnAdd = null;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+tvX = (TextView)findViewById(R.id.et_x);
+tvY = (TextView)findViewById(R.id.et_y);
+tvSum = (TextView)findViewById(R.id.et_sum);
+btnAdd = (Button)findViewById(R.id.btn_add);
+btnAdd.setOnClickListener(new OnClickListener(){
+  
+@Override
+public void onClick(View v) { 
+int x = Integer.valueOf( tvX.getText().toString());
+int y = Integer.valueOf( tvY.getText().toString());
+int sum = 0;
+TestJNI jni = new TestJNI();
+boolean flag = jni.init();
+if(flag){
+sum = jni.add(x, y);
+}
+btnAdd.setText(String.valueOf(sum));
+}
+});
+}
